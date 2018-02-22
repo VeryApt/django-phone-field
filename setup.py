@@ -1,5 +1,5 @@
 from os import path
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 here = path.abspath(path.dirname(__file__))
@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='django-phone-field',
-    version='1.2.0',
+    version='1.3.0',
     url=r'https://github.com/VeryApt/django-phone-field/',
     license='GPL',
     platforms=['OS Independent'],
@@ -31,5 +31,5 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='django phonenumber phone number model field',
-    packages=['phone_field']
+    packages=find_packages()
 )
