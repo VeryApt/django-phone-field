@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from .phone_number import PhoneNumber
+from .forms import PhoneFormField
 
 
 class PhoneField(models.CharField):
