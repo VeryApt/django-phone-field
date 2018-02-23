@@ -19,6 +19,8 @@ This package is designed for Python 3 and Django 1.10+. Install via:
 pip install django-phone-field
 ```
 
+Then add `'phone_field'` to your `INSTALLED_APPS` setting.
+
 ## Usage
 
 In your `models.py`:
@@ -30,7 +32,7 @@ from phone_field import PhoneField
 
 class MyModel(models.Model):
     name = models.CharField(max_length=128)
-    phone = models.PhoneField(blank=True, help_text='Contact phone number')
+    phone = PhoneField(blank=True, help_text='Contact phone number')
 ```
 
 `PhoneField` accepts standard options for a Django `CharField`. By default it sets `max_length=31`. Feel

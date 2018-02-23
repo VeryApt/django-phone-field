@@ -31,5 +31,5 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='django phonenumber phone number model field',
-    packages=find_packages()
+    packages=find_packages(exclude=['test_proj', 'test_app'])
 )

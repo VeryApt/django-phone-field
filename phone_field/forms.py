@@ -3,38 +3,47 @@ from .phone_number import PhoneNumber
 
 
 class PhoneWidget(forms.MultiWidget):
+    template_name = r'phone_field/phone_widget.html'
+
     def __init__(self, attrs=None):
         attrs = attrs or {}
-        first_attrs = {'size': 13}
-        second_attrs = {'size': 4}
-        first_attrs.update(attrs)
-        second_attrs.update(attrs)
-        _widgets = (
-            forms.TextInput(attrs=first_attrs),
-            forms.TextInput(attrs=second_attrs)
+        phone_attrs = {'size': 13}
+        phone_attrs.update(attrs)
+        ext_attrs = {'size': 4}
+        ext_attrs.update(attrs)
+        widgets = (
+            forms.TextInput(phone_attrs),
+            forms.TextInput(ext_attrs)
         )
-        super(PhoneWidget, self).__init__(_widgets, attrs)
+        super().__init__(widgets, attrs=attrs)
 
     def decompress(self, value):
-        if isinstance(value, PhoneNumber):
-            return value.base_number_fmt, 'x'.join(value.extensions)
-        return value, ''
+        if not isinstance(value, PhoneNumber):
+            value = PhoneNumber(value)
+        return value.base_number_fmt, 'x'.join(value.extensions)
 
-    def format_output(self, rendered_widgets):
-        return '{}&nbsp;&nbsp;ext.&nbsp;&nbsp;{}'.format(rendered_widgets[0], rendered_widgets[1])
+    def get_context(self, name, value, attrs):
+        # First sub-widget doesn't get marked as required for some reason
+        self.widgets[0].is_required = attrs.get('required', False)
+        ctx = super().get_context(name, value, attrs)
 
-    def value_from_datadict(self, data, files, name):
-        parts = super(PhoneWidget, self).value_from_datadict(data, files, name)
-        return 'x'.join(p for p in parts if p)
+        # `get_context()` blindly copies the "required" HTML attribute from PhoneFormField to all of the sub-widget
+        # attrs. This is the opposite of the above problem, where "required" doesn't get set in the context.
+        # The text input for phone extension should always be optional. Not sure why Django isn't taking care of this.
+        ctx['widget']['subwidgets'][1]['attrs']['required'] = False
+        return ctx
 
 
-class PhoneFormField(forms.CharField):
-    def __init__(self, *args, **kwargs):
-        kwargs['widget'] = PhoneWidget
-        super(PhoneFormField, self).__init__(*args, **kwargs)
+class PhoneFormField(forms.MultiValueField):
+    widget = PhoneWidget
 
-    def to_python(self, value):
-        val = super(PhoneFormField, self).to_python(value)
-        if val:
-            val = PhoneNumber(val)
-        return val
+    def __init__(self, *, require_all_fields=False, **kwargs):
+        fields = (
+            forms.CharField(),
+            forms.CharField(required=False)
+        )
+        super().__init__(fields, require_all_fields=require_all_fields, **kwargs)
+
+    def compress(self, data_list):
+        str_val = 'x'.join(x for x in data_list if x)
+        return PhoneNumber(str_val)

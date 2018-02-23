@@ -30,9 +30,10 @@ class PhoneField(models.CharField):
     def get_prep_value(self, value):
         if not value:
             return ''
-        elif isinstance(value, PhoneNumber):
-            return value.cleaned
-        return value
+
+        if not isinstance(value, PhoneNumber):
+            value = PhoneNumber(value)
+        return value.cleaned
 
     def formfield(self, **kwargs):
         kwargs['form_class'] = PhoneFormField
