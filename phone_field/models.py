@@ -36,7 +36,9 @@ class PhoneField(models.CharField):
         return value.cleaned
 
     def formfield(self, **kwargs):
-        kwargs['form_class'] = PhoneFormField
+        if kwargs.get('form_class') is None:
+            kwargs['form_class'] = PhoneFormField
+            kwargs.pop('widget', None)
         return super(PhoneField, self).formfield(**kwargs)
 
     @staticmethod

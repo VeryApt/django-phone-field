@@ -1,0 +1,3 @@
+include LICENSE
+include README.md
+recursive-include phone_field/templates *

@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import connection
 from django.forms import Form, modelform_factory
 from django.template import Context, Template
@@ -49,6 +50,16 @@ PARSING_TESTS = [
         }
     )
 ]
+
+
+#https://github.com/django/django/blob/master/tests/modeladmin/tests.py
+class MockRequest:
+    pass
+
+
+class MockSuperUser:
+    def has_perm(self, perm):
+        return True
 
 
 class TestFormRequired(Form):
@@ -149,6 +160,23 @@ class ModelFormTest(TestCase):
         obj = f.save()
         self.assertIsInstance(obj.phone, PhoneNumber)
         self.assertEqual(str(obj.phone), '(415) 123-4567, press 88')
+
+
+class AdminFormTest(TestCase):
+    def setUp(self):
+        self.site = admin.AdminSite()
+        self.request = MockRequest()
+        self.request.user = MockSuperUser()
+
+    def test_admin_rendering(self):
+        ma = admin.ModelAdmin(TestModel, self.site)
+        obj = TestModel(phone='415 123 4567 x 88')
+        Form = ma.get_form(self.request)
+        f = Form(instance=obj)
+        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
+                   'value="(415) 123-4567" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
+                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
+        self.assertEqual(str(f), expected)
 
 
 class ModelTest(TestCase):
