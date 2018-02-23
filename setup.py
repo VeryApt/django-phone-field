@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='django-phone-field',
-    version='1.5.3',
+    version='1.5.4',
     url=r'https://github.com/VeryApt/django-phone-field/',
     license='GPL',
     platforms=['OS Independent'],

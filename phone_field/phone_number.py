@@ -11,7 +11,7 @@ PHONE_TEST_REGEX = re.compile(r'^\+?1?-?\s*'        # optional leading '+1-' and
 
 class PhoneNumber(object):
     def __init__(self, txt):
-        self.raw_phone = txt or ''
+        self.raw_phone = str(txt) if txt else ''
         self._is_parsed = False
         self._base_number = ''
         self._base_number_dirty = ''
@@ -113,6 +113,8 @@ class PhoneNumber(object):
         return bool(self.cleaned)
 
     def __eq__(self, ph):
-        if not isinstance(ph, PhoneNumber):
-            ph = PhoneNumber(ph)
-        return self.cleaned == ph.cleaned
+        if isinstance(ph, PhoneNumber):
+            return self.cleaned == ph.cleaned
+        elif isinstance(ph, str):
+            return self.cleaned == PhoneNumber(ph).cleaned
+        return False
