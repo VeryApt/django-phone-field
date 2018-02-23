@@ -93,7 +93,8 @@ class PhoneNumber(object):
         self.parse()
         return self._extensions
 
-    def __str__(self):
+    @property
+    def formatted(self):
         val = self.base_number_fmt
         if self._valid_extensions:
             for ext in self._extensions:
@@ -101,6 +102,9 @@ class PhoneNumber(object):
         elif self._has_extensions:
             val += 'x' + 'x'.join(self._extensions)
         return val
+
+    def __str__(self):
+        return self.formatted
 
     def __len__(self):
         return len(self.cleaned)

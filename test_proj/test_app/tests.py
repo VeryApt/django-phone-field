@@ -1,10 +1,54 @@
 from django.db import connection
-from django.forms import Form, CharField
+from django.forms import Form
 from django.template import Context, Template
 from django.test import TestCase
-from phone_field import PhoneField, PhoneNumber
+from phone_field import PhoneNumber
 from phone_field.forms import PhoneFormField
 from .models import TestModel
+
+
+PARSING_TESTS = [
+    (
+        '4151234567',
+        'simple',
+        {
+            'cleaned': '+14151234567', 'formatted': '(415) 123-4567', 'base_number': '+14151234567',
+            'base_number_fmt': '(415) 123-4567', 'is_E164': True, 'is_standard': True, 'is_usa': True
+        }
+    ),
+    (
+        '(415) 123-4567',
+        'already formatted',
+        {
+            'cleaned': '+14151234567', 'formatted': '(415) 123-4567', 'base_number': '+14151234567',
+            'base_number_fmt': '(415) 123-4567', 'is_E164': True, 'is_standard': True, 'is_usa': True
+        }
+    ),
+    (
+        ' (415).123 - 4567 ',
+        'messy formatted',
+        {
+            'cleaned': '+14151234567', 'formatted': '(415) 123-4567', 'base_number': '+14151234567',
+            'base_number_fmt': '(415) 123-4567', 'is_E164': True, 'is_standard': True, 'is_usa': True
+        }
+    ),
+    (
+        ' (415).123 - 4567 x 44',
+        'messy formatted with extension',
+        {
+            'cleaned': '+14151234567x44', 'formatted': '(415) 123-4567, press 44', 'base_number': '+14151234567',
+            'base_number_fmt': '(415) 123-4567', 'is_E164': False, 'is_standard': True, 'is_usa': True
+        }
+    ),
+    (
+        '+44 (0)20-1234-3000',
+        'international/unsupported',
+        {
+            'cleaned': '+44 (0)20-1234-3000', 'formatted': '+44 (0)20-1234-3000', 'base_number': '+44 (0)20-1234-3000',
+            'base_number_fmt': '+44 (0)20-1234-3000', 'is_E164': False, 'is_standard': False, 'is_usa': False
+        }
+    )
+]
 
 
 class TestFormRequired(Form):
@@ -13,6 +57,14 @@ class TestFormRequired(Form):
 
 class TestFormOptional(Form):
     phone = PhoneFormField(required=False)
+
+
+class ParsingTest(TestCase):
+    def test_parsing(self):
+        for input_str, label, attrs in PARSING_TESTS:
+            ph = PhoneNumber(input_str)
+            for key, val in attrs.items():
+                self.assertEqual(getattr(ph, key), val, msg=label)
 
 
 class RenderingTest(TestCase):
@@ -81,44 +133,17 @@ class OptionalFormTest(TestCase):
 
 
 class ModelTest(TestCase):
-    def _test_parsing(self, str_in, str_db, str_cleaned, str_fmt, str_base, str_base_fmt, is_E164, is_standard, 
-                      is_usa):
-        obj = TestModel(phone=str_in)
+    def test_storage_retrieval(self):
+        obj = TestModel(phone='(415) 123-4567 x 88')
         obj.save()
 
         # Test raw value
         with connection.cursor() as c:
             c.execute("SELECT phone FROM test_app_testmodel WHERE id={}".format(obj.pk))
             r = c.fetchone()
-            self.assertEqual(r[0], str_db, msg='Raw DB value mismatch')
+            self.assertEqual(r[0], '+14151234567x88', msg='Raw DB value mismatch')
 
         # Test Django attributes
         obj.refresh_from_db()
         self.assertIsInstance(obj.phone, PhoneNumber)
-        self.assertEqual(obj.phone.cleaned, str_cleaned)
-        self.assertEqual(str(obj.phone), str_fmt)
-        self.assertEqual(obj.phone.base_number, str_base)
-        self.assertEqual(obj.phone.base_number_fmt, str_base_fmt)
-        self.assertEqual(obj.phone.is_E164, is_E164)
-        self.assertEqual(obj.phone.is_standard, is_standard)
-        self.assertEqual(obj.phone.is_usa, is_usa)
-
-    def test_cleanest_phone(self):
-        self._test_parsing('4151234567', '+14151234567', '+14151234567', '(415) 123-4567', '+14151234567',
-                           '(415) 123-4567', True, True, True)
-
-    def test_formatted_phone(self):
-        self._test_parsing('(415) 123-4567', '+14151234567', '+14151234567', '(415) 123-4567', '+14151234567',
-                           '(415) 123-4567', True, True, True)
-
-    def test_messy_phone(self):
-        self._test_parsing(' (415).123 - 4567 ', '+14151234567', '+14151234567', '(415) 123-4567', '+14151234567',
-                           '(415) 123-4567', True, True, True)
-
-    def test_extension(self):
-        self._test_parsing(' (415).123 - 4567 x 44', '+14151234567x44', '+14151234567x44', '(415) 123-4567, press 44',
-                           '+14151234567', '(415) 123-4567', False, True, True)
-
-    def test_international(self):
-        self._test_parsing('+44 (0)20-1234-3000', '+44 (0)20-1234-3000', '+44 (0)20-1234-3000',
-                           '+44 (0)20-1234-3000', '+44 (0)20-1234-3000', '+44 (0)20-1234-3000', False, False, False)
+        self.assertEqual(str(obj.phone), '(415) 123-4567, press 88')
