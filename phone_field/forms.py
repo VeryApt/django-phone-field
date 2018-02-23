@@ -46,6 +46,10 @@ class PhoneFormField(forms.MultiValueField):
         super().__init__(fields, require_all_fields=require_all_fields, **kwargs)
 
     def compress(self, data_list):
+        # A completely empty widget short-circuits normal validation and returns []
+        if not data_list:
+            return PhoneNumber('')
+
         str_val = 'x'.join(x for x in data_list if x)
         return PhoneNumber(str_val)
 

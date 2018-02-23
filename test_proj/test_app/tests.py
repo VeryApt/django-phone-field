@@ -5,7 +5,7 @@ from django.template import Context, Template
 from django.test import TestCase
 from phone_field import PhoneNumber
 from phone_field.forms import PhoneFormField
-from .models import TestModel
+from .models import TestModel, TestModelOptional
 
 
 PARSING_TESTS = [
@@ -160,6 +160,24 @@ class ModelFormTest(TestCase):
         obj = f.save()
         self.assertIsInstance(obj.phone, PhoneNumber)
         self.assertEqual(str(obj.phone), '(415) 123-4567, press 88')
+
+
+class OptionalModelFormTest(TestCase):
+    def test_modelform_rendering(self):
+        Form = modelform_factory(TestModelOptional, fields=('phone',))
+        obj = TestModelOptional(phone='415 123 4567 x 88')
+        f = Form(instance=obj)
+        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
+                   'value="(415) 123-4567" size="13" id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
+                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
+        self.assertEqual(str(f), expected)
+
+    def test_modelform_empty(self):
+        Form = modelform_factory(TestModelOptional, fields=('name', 'phone'))
+        f = Form({'name': 'Ted', 'phone_0': '', 'phone_1': ''})
+        self.assertTrue(f.is_valid())
+        obj = f.save()
+        self.assertEqual(obj.phone, '')
 
 
 class AdminFormTest(TestCase):

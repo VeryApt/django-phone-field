@@ -111,3 +111,8 @@ class PhoneNumber(object):
 
     def __bool__(self):
         return bool(self.cleaned)
+
+    def __eq__(self, ph):
+        if not isinstance(ph, PhoneNumber):
+            ph = PhoneNumber(ph)
+        return self.cleaned == ph.cleaned

@@ -5,6 +5,8 @@ from .forms import PhoneFormField
 
 
 class PhoneField(models.CharField):
+    empty_values = models.CharField.empty_values + [PhoneNumber('')]
+
     def __init__(self, *args, **kwargs):
         if kwargs.pop('E164_only', False):
             self.default_validators = [self._validate_E164]
