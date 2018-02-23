@@ -1,5 +1,5 @@
 from django.db import connection
-from django.forms import Form
+from django.forms import Form, modelform_factory
 from django.template import Context, Template
 from django.test import TestCase
 from phone_field import PhoneNumber
@@ -132,6 +132,25 @@ class OptionalFormTest(TestCase):
         self.assertEqual(str(f.cleaned_data['phone']), '(415) 123-4567, press 88')
 
 
+class ModelFormTest(TestCase):
+    def test_modelform_rendering(self):
+        Form = modelform_factory(TestModel, fields=('phone',))
+        obj = TestModel(phone='415 123 4567 x 88')
+        f = Form(instance=obj)
+        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
+                   'value="(415) 123-4567" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
+                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
+        self.assertEqual(str(f), expected)
+
+    def test_modelform_saving(self):
+        Form = modelform_factory(TestModel, fields=('phone',))
+        f = Form({'phone_0': '415.123.4567', 'phone_1': '88'})
+        self.assertTrue(f.is_valid())
+        obj = f.save()
+        self.assertIsInstance(obj.phone, PhoneNumber)
+        self.assertEqual(str(obj.phone), '(415) 123-4567, press 88')
+
+
 class ModelTest(TestCase):
     def test_storage_retrieval(self):
         obj = TestModel(phone='(415) 123-4567 x 88')
@@ -147,3 +166,7 @@ class ModelTest(TestCase):
         obj.refresh_from_db()
         self.assertIsInstance(obj.phone, PhoneNumber)
         self.assertEqual(str(obj.phone), '(415) 123-4567, press 88')
+
+    def test_field_attrs(self):
+        self.assertEqual(TestModel._meta.get_field('phone').max_length, 31)
+

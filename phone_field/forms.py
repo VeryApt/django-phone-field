@@ -38,6 +38,7 @@ class PhoneFormField(forms.MultiValueField):
     widget = PhoneWidget
 
     def __init__(self, *, require_all_fields=False, **kwargs):
+        self.max_length = kwargs.pop('max_length', None)
         fields = (
             forms.CharField(),
             forms.CharField(required=False)
@@ -47,3 +48,7 @@ class PhoneFormField(forms.MultiValueField):
     def compress(self, data_list):
         str_val = 'x'.join(x for x in data_list if x)
         return PhoneNumber(str_val)
+
+    def validate(self, value):
+        if self.max_length is not None and value and len(value) > self.max_length:
+            raise forms.ValidationError('Phone number is too long.')
