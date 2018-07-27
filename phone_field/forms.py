@@ -1,5 +1,5 @@
 from django import forms
-from .phone_number import PhoneNumber
+from .phone_number import PhoneNumber, BACKEND_EXTENSION_SEPARATOR
 
 
 class PhoneWidget(forms.MultiWidget):
@@ -20,7 +20,7 @@ class PhoneWidget(forms.MultiWidget):
     def decompress(self, value):
         if not isinstance(value, PhoneNumber):
             value = PhoneNumber(value)
-        return value.base_number_fmt, 'x'.join(value.extensions)
+        return value.base_number_fmt, BACKEND_EXTENSION_SEPARATOR.join(value.extensions)
 
     def get_context(self, name, value, attrs):
         # First sub-widget doesn't get marked as required for some reason
@@ -50,7 +50,7 @@ class PhoneFormField(forms.MultiValueField):
         if not data_list:
             return PhoneNumber('')
 
-        str_val = 'x'.join(x for x in data_list if x)
+        str_val = BACKEND_EXTENSION_SEPARATOR.join(x for x in data_list if x)
         return PhoneNumber(str_val)
 
     def validate(self, value):
