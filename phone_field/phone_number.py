@@ -8,6 +8,7 @@ PHONE_TEST_REGEX = re.compile(r'^\+?1?-?\s*'        # optional leading '+1-' and
                               r'[-\.\s]*'           # strip -, ., and whitespace
                               r'(\d{4})$')          # last four digits
 
+VALID_EXTENSION_SEPARATOR = ', press '
 
 class PhoneNumber(object):
     def __init__(self, txt):
@@ -23,7 +24,11 @@ class PhoneNumber(object):
 
     def parse(self):
         if not self._is_parsed and self.raw_phone:
-            parts = self.raw_phone.split('x')
+            if VALID_EXTENSION_SEPARATOR in self.raw_phone:
+                parts = self.raw_phone.split(VALID_EXTENSION_SEPARATOR)
+            else:
+                parts = self.raw_phone.split('x')
+
             self._base_number = self._base_number_dirty = parts[0].strip()
             self._extensions = [x.strip() for x in parts[1:]]
 
@@ -98,7 +103,7 @@ class PhoneNumber(object):
         val = self.base_number_fmt
         if self._valid_extensions:
             for ext in self._extensions:
-                val += ', press {}'.format(ext)
+                val += VALID_EXTENSION_SEPARATOR + str(ext)
         elif self._has_extensions:
             val += 'x' + 'x'.join(self._extensions)
         return val
