@@ -117,4 +117,6 @@ class PhoneNumber(object):
             return self.cleaned == ph.cleaned
         elif isinstance(ph, str):
             return self.cleaned == PhoneNumber(ph).cleaned
+        elif not ph and not self:
+            return True
         return False
