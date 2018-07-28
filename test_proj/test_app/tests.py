@@ -26,6 +26,14 @@ PARSING_TESTS = [
         }
     ),
     (
+        '(415) 123-4567, press 44',
+        'already formatted with valid extensions',
+        {
+            'cleaned': '+14151234567x44', 'formatted': '(415) 123-4567, press 44', 'base_number': '+14151234567',
+            'base_number_fmt': '(415) 123-4567', 'is_E164': False, 'is_standard': True, 'is_usa': True
+        }
+    ),
+    (
         ' (415).123 - 4567 ',
         'messy formatted',
         {
