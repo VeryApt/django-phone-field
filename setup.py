@@ -16,6 +16,7 @@ setup(
     description='Lightweight model and form field for phone numbers in Django',
     install_requires=['Django>=1.10'],
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     author='Andrew Mackowski',
     author_email='andrew@veryapt.com',
     maintainer='Andrew Mackowski',
