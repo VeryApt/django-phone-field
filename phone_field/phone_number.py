@@ -1,17 +1,18 @@
 import re
 
 
-PHONE_TEST_REGEX = re.compile(r'^\+?1?-?\s*'        # optional leading '+1-' and whitespace
-                              r'\(?([2-9]\d{2})\)?' # extract first three digits (0/1 first digit is international)
-                              r'[-\.\s]*'           # strip -, ., and whitespace
-                              r'(\d{3})'            # next three digits
-                              r'[-\.\s]*'           # strip -, ., and whitespace
-                              r'(\d{4})$')          # last four digits
+PHONE_TEST_REGEX = re.compile(r'^\+?1?-?\s*'         # optional leading '+1-' and whitespace
+                              r'\(?([2-9]\d{2})\)?'  # extract first three digits (0/1 first digit is international)
+                              r'[-\.\s]*'            # strip -, ., and whitespace
+                              r'(\d{3})'             # next three digits
+                              r'[-\.\s]*'            # strip -, ., and whitespace
+                              r'(\d{4})$')           # last four digits
 
 BACKEND_EXTENSION_SEPARATOR = 'x'
 VALID_EXTENSION_SEPARATOR = ', press '
 
-class PhoneNumber(object):
+
+class PhoneNumber:
     def __init__(self, txt):
         self.raw_phone = str(txt) if txt else ''
         self._is_parsed = False
