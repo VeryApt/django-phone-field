@@ -1,3 +1,4 @@
+from django import VERSION as DJANGO_VERSION
 from django.contrib import admin
 from django.db import connection
 from django.forms import Form, modelform_factory
@@ -60,6 +61,21 @@ PARSING_TESTS = [
 ]
 
 
+def _rendered_field_html(phone_number, extension, required):
+    expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
+               f'value="{phone_number}" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
+               f'<input type="text" name="phone_1" value="{extension}" size="4" id="id_phone_1" /></td></tr>'
+
+    if not required:
+        expected = expected.replace(' required', '')
+
+    if DJANGO_VERSION >= (2, 1):
+        # Django 2.1+ <input> tags are not self-closing
+        expected = expected.replace(' />', '>')
+
+    return expected
+
+
 #https://github.com/django/django/blob/master/tests/modeladmin/tests.py
 class MockRequest:
     pass
@@ -111,10 +127,7 @@ class RenderingTest(TestCase):
 class RequiredFormTest(TestCase):
     def test_form_rendering(self):
         f = TestFormRequired(initial={'phone': PhoneNumber('415.123.4567 x 12')})
-        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-                   'value="(415) 123-4567" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
-                   '<input type="text" name="phone_1" value="12" size="4" id="id_phone_1" /></td></tr>'
-        self.assertEqual(str(f), expected)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='12', required=True))
 
     def test_form_empty(self):
         f = TestFormRequired({})
@@ -136,10 +149,7 @@ class RequiredFormTest(TestCase):
 class OptionalFormTest(TestCase):
     def test_form_rendering(self):
         f = TestFormOptional(initial={'phone': PhoneNumber('415.123.4567 x 12')})
-        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-                   'value="(415) 123-4567" size="13" id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
-                   '<input type="text" name="phone_1" value="12" size="4" id="id_phone_1" /></td></tr>'
-        self.assertEqual(str(f), expected)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='12', required=False))
 
     def test_form_empty(self):
         f = TestFormOptional({})
@@ -156,10 +166,7 @@ class ModelFormTest(TestCase):
         Form = modelform_factory(TestModel, fields=('phone',))
         obj = TestModel(phone='415 123 4567 x 88')
         f = Form(instance=obj)
-        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-                   'value="(415) 123-4567" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
-                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
-        self.assertEqual(str(f), expected)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=True))
 
     def test_modelform_saving(self):
         Form = modelform_factory(TestModel, fields=('phone',))
@@ -175,10 +182,7 @@ class OptionalModelFormTest(TestCase):
         Form = modelform_factory(TestModelOptional, fields=('phone',))
         obj = TestModelOptional(phone='415 123 4567 x 88')
         f = Form(instance=obj)
-        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-                   'value="(415) 123-4567" size="13" id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
-                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
-        self.assertEqual(str(f), expected)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=False))
 
     def test_modelform_empty(self):
         Form = modelform_factory(TestModelOptional, fields=('name', 'phone'))
@@ -199,10 +203,7 @@ class AdminFormTest(TestCase):
         obj = TestModel(phone='415 123 4567 x 88')
         Form = ma.get_form(self.request)
         f = Form(instance=obj)
-        expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-                   'value="(415) 123-4567" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
-                   '<input type="text" name="phone_1" value="88" size="4" id="id_phone_1" /></td></tr>'
-        self.assertEqual(str(f), expected)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=True))
 
 
 class ModelTest(TestCase):
