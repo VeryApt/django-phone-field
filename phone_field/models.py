@@ -16,7 +16,7 @@ class PhoneField(models.CharField):
         opts.update(kwargs)
         super(PhoneField, self).__init__(*args, **opts)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         # Called whenever data is loaded from the DB (the reverse of get_prep_value()).
         # https://docs.djangoproject.com/en/1.10/ref/models/fields/#django.db.models.Field.from_db_value
         return self.to_python(value)
