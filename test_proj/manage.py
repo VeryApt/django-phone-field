@@ -2,6 +2,12 @@
 import os
 import sys
 
+import warnings
+from django.utils.deprecation import RemovedInDjango30Warning, RemovedInNextVersionWarning
+
+warnings.filterwarnings('always', category=RemovedInDjango30Warning)
+warnings.filterwarnings('always', category=RemovedInNextVersionWarning)
+
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "test_proj.settings")
     try:
