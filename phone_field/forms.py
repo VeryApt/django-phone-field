@@ -5,15 +5,14 @@ from .phone_number import PhoneNumber, BACKEND_EXTENSION_SEPARATOR
 class PhoneWidget(forms.MultiWidget):
     template_name = r'phone_field/phone_widget.html'
 
-    def __init__(self, attrs=None):
-        attrs = attrs or {}
-        phone_attrs = {'size': 13}
-        phone_attrs.update(attrs)
-        ext_attrs = {'size': 4}
-        ext_attrs.update(attrs)
+    def __init__(self, attrs={}, phone_attrs=None, ext_attrs=None):   
+        def_phone_attrs = {'size': 13}
+        def_phone_attrs.update(phone_attrs or attrs)
+        def_ext_attrs = {'size': 4}
+        def_ext_attrs.update(ext_attrs or attrs)
         widgets = (
-            forms.TextInput(phone_attrs),
-            forms.TextInput(ext_attrs)
+            forms.TextInput(def_phone_attrs),
+            forms.TextInput(def_ext_attrs)
         )
         super().__init__(widgets, attrs=attrs)
 
