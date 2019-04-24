@@ -10,3 +10,6 @@ class TestModelOptional(models.Model):
     name = models.CharField(max_length=31)
     phone = PhoneField(blank=True)
 
+
+class TestModelBlankNull(models.Model):
+    phone = PhoneField(blank=True, null=True)

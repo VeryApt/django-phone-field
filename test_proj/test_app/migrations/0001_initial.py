@@ -27,4 +27,11 @@ class Migration(migrations.Migration):
                 ('phone', phone_field.models.PhoneField(blank=True, max_length=31)),
             ],
         ),
+        migrations.CreateModel(
+            name='TestModelBlankNull',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('phone', phone_field.models.PhoneField(blank=True, null=True, max_length=31)),
+            ],
+        ),
     ]

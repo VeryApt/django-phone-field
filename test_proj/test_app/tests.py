@@ -6,7 +6,7 @@ from django.template import Context, Template
 from django.test import TestCase
 from phone_field import PhoneNumber
 from phone_field.forms import PhoneFormField
-from .models import TestModel, TestModelOptional
+from .models import TestModel, TestModelOptional, TestModelBlankNull
 
 
 PARSING_TESTS = [
@@ -167,6 +167,12 @@ class ModelFormTest(TestCase):
         obj = TestModel(phone='415 123 4567 x 88')
         f = Form(instance=obj)
         self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=True))
+
+    def test_modelform_rendering_nullable(self):
+        Form = modelform_factory(TestModelBlankNull, fields=('phone',))
+        obj = TestModel(phone='415 123 4567 x 88')
+        f = Form(instance=obj)
+        self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=False))
 
     def test_modelform_saving(self):
         Form = modelform_factory(TestModel, fields=('phone',))

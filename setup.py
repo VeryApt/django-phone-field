@@ -9,7 +9,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='django-phone-field',
-    version='1.7.0',
+    version='1.7.1',
     url=r'https://github.com/VeryApt/django-phone-field/',
     license='GPL',
     platforms=['OS Independent'],
@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords='django phonenumber phone number model field',
     packages=find_packages(exclude=['test_proj', 'test_app']),

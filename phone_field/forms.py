@@ -38,6 +38,10 @@ class PhoneFormField(forms.MultiValueField):
 
     def __init__(self, *, require_all_fields=False, **kwargs):
         self.max_length = kwargs.pop('max_length', None)
+
+        # Disregard 'empty_value' kwarg from CharField model defaults
+        kwargs.pop('empty_value', None)
+
         fields = (
             forms.CharField(),
             forms.CharField(required=False)
