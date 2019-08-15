@@ -63,7 +63,8 @@ PARSING_TESTS = [
 
 def _rendered_field_html(phone_number, extension, required):
     expected = '<tr><th><label for="id_phone_0">Phone:</label></th><td><input type="text" name="phone_0" ' \
-               f'value="{phone_number}" size="13" required id="id_phone_0" />\n\n&nbsp;&nbsp;ext.&nbsp;&nbsp;' \
+               f'value="{phone_number}" size="13" required id="id_phone_0" /><span class="phone-field-ext">' \
+               f'&nbsp;&nbsp;ext.&nbsp;&nbsp;</span>' \
                f'<input type="text" name="phone_1" value="{extension}" size="4" id="id_phone_1" /></td></tr>'
 
     if not required:
