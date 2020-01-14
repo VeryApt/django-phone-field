@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from test_app import views as test_app_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('form_view_1/', test_app_views.FormView1.as_view()),
+    path('admin/', admin.site.urls)
 ]
