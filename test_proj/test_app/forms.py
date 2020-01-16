@@ -7,4 +7,4 @@ class RequiredInputsForm(ModelForm):
 
     class Meta:
         model = TestModel
-        fields = ['phone']
+        fields = ['phone', 'first_name', 'last_name']

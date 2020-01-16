@@ -4,6 +4,8 @@ from phone_field import PhoneField
 
 class TestModel(models.Model):
     phone = PhoneField()
+    first_name = models.CharField(max_length=31)
+    last_name = models.CharField(max_length=31)
 
 
 class TestModelOptional(models.Model):
