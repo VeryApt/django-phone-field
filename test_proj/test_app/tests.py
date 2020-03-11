@@ -208,7 +208,7 @@ class AdminFormTest(TestCase):
     def test_admin_rendering(self):
         ma = admin.ModelAdmin(TestModel, self.site)
         obj = TestModel(phone='415 123 4567 x 88')
-        Form = ma.get_form(self.request)
+        Form = ma.get_form(self.request, fields=['phone'])
         f = Form(instance=obj)
         self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=True))
 
