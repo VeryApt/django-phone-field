@@ -119,6 +119,9 @@ class PhoneNumber:
     def __bool__(self):
         return bool(self.cleaned)
 
+    def __hash__(self):
+        return hash(self.cleaned)
+
     def __eq__(self, ph):
         if isinstance(ph, PhoneNumber):
             return self.cleaned == ph.cleaned

@@ -1,12 +1,12 @@
 from django import VERSION as DJANGO_VERSION
 from django.contrib import admin
 from django.db import connection
-from django.forms import Form, modelform_factory
+from django.forms import Form, modelform_factory, inlineformset_factory
 from django.template import Context, Template
 from django.test import TestCase
 from phone_field import PhoneNumber
 from phone_field.forms import PhoneFormField
-from .models import TestModel, TestModelOptional, TestModelBlankNull
+from .models import TestModel, TestModelOptional, TestModelBlankNull, Business, Employee
 
 
 PARSING_TESTS = [
@@ -211,6 +211,26 @@ class AdminFormTest(TestCase):
         Form = ma.get_form(self.request, fields=['phone'])
         f = Form(instance=obj)
         self.assertEqual(str(f), _rendered_field_html(phone_number='(415) 123-4567', extension='88', required=True))
+
+
+class InlineFormsetTest(TestCase):
+    def test_validate_inlineformset(self):
+        FormSet = inlineformset_factory(Business, Employee, fields=('name', 'phone'))
+        business = Business.objects.create(name='Some Business')
+        emp_1 = Employee.objects.create(name='1', business=business, phone='4151112222')
+        formset = FormSet({
+            'employee_set-TOTAL_FORMS': '1',
+            'employee_set-INITIAL_FORMS': '2',
+            'employee_set-MIN_NUM_FORMS': '0',
+            'employee_set-MAX_NUM_FORMS': '1000',
+            'employee_set-0-name': 'Employee 1',
+            'employee_set-0-phone_0': '415 111 2222',
+            'employee_set-0-phone_1': '',
+            'employee_set-0-id': str(emp_1.pk),
+            'employee_set-0-business': str(business.pk)
+        }, instance=business)
+        formset.clean()
+        self.assertTrue(formset.is_valid())
 
 
 class ModelTest(TestCase):

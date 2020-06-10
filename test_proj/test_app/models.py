@@ -15,3 +15,13 @@ class TestModelOptional(models.Model):
 
 class TestModelBlankNull(models.Model):
     phone = PhoneField(blank=True, null=True)
+
+
+class Business(models.Model):
+    name = models.CharField(max_length=31)
+
+
+class Employee(models.Model):
+    name = models.CharField(max_length=31)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    phone = PhoneField(blank=False, unique=True)
